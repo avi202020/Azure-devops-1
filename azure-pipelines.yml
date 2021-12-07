@@ -57,5 +57,5 @@ steps:
 - task: Bash@3
   inputs:
     targetType: 'inline'
-    script: 'trivy image sharadhi:23'
+    script: 'trivy image sharadhi:25'
 
