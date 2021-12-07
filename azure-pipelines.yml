@@ -1,0 +1,61 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  trivyVersion: 0.9.1
+
+steps:
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml' 
+    goals: ' -DskipTests package' 
+    publishJUnitResults: true 
+    testResultsFiles: 'target/surefire-reports/**/*.xml' # Required when publishJUnitResults == True
+    
+# Copy files
+
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: $(system.defaultworkingdirectory)
+    targetFolder: $(Build.ArtifactStagingDirectory)
+ 
+ 
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: $(Build.ArtifactStagingDirectory)
+    
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: JUnit
+    testResultsFiles: '**/TEST-*.xml'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      sudo apt-get install rpm
+          wget https://github.com/aquasecurity/trivy/releases/download/v$(trivyVersion)/trivy_$(trivyVersion)_Linux-64bit.deb
+          sudo dpkg -i trivy_$(trivyVersion)_Linux-64bit.deb
+          trivy -v
+  displayName: 'Download and install Trivy'
+
+- task: Docker@2
+  inputs:
+    repository: 'sharadhi'
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: 'trivy image sharadhi'
+
