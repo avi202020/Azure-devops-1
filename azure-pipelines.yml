@@ -61,3 +61,19 @@ steps:
     targetType: 'inline'
     script: 'trivy image sharadhi:tag1'
 
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      curl --location https://github.com/accurics/terrascan/releases/download/v1.3.1/terrascan_1.3.1_Linux_x86_64.tar.gz --output terrascan.tar.gz
+          tar -xvf terrascan.tar.gz
+          sudo install terrascan /usr/local/bin
+  displayName: 'Download and Install terrascan'
+
+- task: Bash@3
+  displayName: 'Scan yaml using terrascan'
+  inputs:
+    targetType: 'inline'
+    script: 'terrascan scan -i k8s'
+
+
