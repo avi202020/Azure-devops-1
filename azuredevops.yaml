@@ -48,16 +48,10 @@ steps:
           tar -xvf terrascan.tar.gz
           sudo install terrascan /usr/local/bin
 
-- task: Maven@3
+- task: Docker@2
   inputs:
-    mavenPomFile: 'pom.xml'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    javaHomeOption: 'JDKVersion'
-    mavenVersionOption: 'Default'
-    mavenAuthenticateFeed: false
-    effectivePomSkip: false
-    sonarQubeRunAnalysis: false
-
+    repository: 'pipelines-javascript-docker'
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
 
 
