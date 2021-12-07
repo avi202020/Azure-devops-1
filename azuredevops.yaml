@@ -1,5 +1,9 @@
 pool:
   vmImage: 'ubuntu-18.04'
+
+variables:
+  trivyVersion: 0.9.1
+
 steps:
 - task: Maven@3
   inputs:
@@ -26,4 +30,34 @@ steps:
     testResultsFormat: JUnit
     testResultsFiles: '**/TEST-*.xml'
     searchFolder: '$(System.DefaultWorkingDirectory)'
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      sudo apt-get install rpm
+          wget https://github.com/aquasecurity/trivy/releases/download/v$(trivyVersion)/trivy_$(trivyVersion)_Linux-64bit.deb
+          sudo dpkg -i trivy_$(trivyVersion)_Linux-64bit.deb
+          trivy -v
+  displayName: 'Download and install Trivy'
+  
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      curl --location https://github.com/accurics/terrascan/releases/download/v1.3.1/terrascan_1.3.1_Linux_x86_64.tar.gz --output terrascan.tar.gz
+          tar -xvf terrascan.tar.gz
+          sudo install terrascan /usr/local/bin
+
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    javaHomeOption: 'JDKVersion'
+    mavenVersionOption: 'Default'
+    mavenAuthenticateFeed: false
+    effectivePomSkip: false
+    sonarQubeRunAnalysis: false
+
+
 
