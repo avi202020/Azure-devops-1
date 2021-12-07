@@ -71,9 +71,9 @@ steps:
   displayName: 'Download and Install terrascan'
 
 - task: Bash@3
-  displayName: 'Scan yaml using terrascan'
   inputs:
     targetType: 'inline'
     script: 'terrascan scan -i k8s'
+  displayName: 'Scan yaml using terrascan'
 
 
