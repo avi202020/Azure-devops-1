@@ -53,9 +53,11 @@ steps:
     repository: 'sharadhi'
     command: 'build'
     Dockerfile: '**/Dockerfile'
+    tags: tag1
+
 
 - task: Bash@3
   inputs:
     targetType: 'inline'
-    script: 'trivy image sharadhi:25'
+    script: 'trivy image sharadhi:tag1'
 
