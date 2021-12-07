@@ -48,10 +48,14 @@ steps:
           tar -xvf terrascan.tar.gz
           sudo install terrascan /usr/local/bin
 
+
 - task: Docker@2
   inputs:
-    repository: 'pipelines-javascript-docker'
-    command: 'build'
+    repository: 'nanditarepo'
+    command: 'buildAndPush'
     Dockerfile: '**/Dockerfile'
 
-
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: 'sh "trivy image nanditarepo"'
