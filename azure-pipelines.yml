@@ -5,8 +5,7 @@ variables:
   trivyVersion: 0.9.1
   repository: 'hudevsecopstarks'
   tag: 'v1.0.0'
-  userName: 'nanditahudevopscr'
-  acrlink: 'nanditahudevopscr.azurecr.io'
+
 
 steps:
 - task: Maven@3
@@ -50,11 +49,11 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      sudo docker login $(acrlink) -u $(userName) -p $(password)
+      sudo docker login $(acr_link) -u $(userName) -p $(password)
       
-      sudo docker tag $(repository):$(tag) $(acrlink)/$(repository):$(tag)
+      sudo docker tag $(repository):$(tag) $(acr_link)/$(repository):$(tag)
       
-      sudo docker push $(acrlink)/$(repository):$(tag)
+      sudo docker push $(acr_link)/$(repository):$(tag)
   displayName: 'Pushing Image to Container Registery'
 
 - task: Bash@3
