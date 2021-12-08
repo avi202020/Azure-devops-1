@@ -7,7 +7,6 @@ variables:
   tag: 'v1.0.0'
   userName: 'nanditahudevopscr'
   acrlink: 'nanditahudevopscr.azurecr.io'
-  password: $(password)
 
 steps:
 - task: Maven@3
