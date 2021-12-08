@@ -1,16 +1,12 @@
-# Maven
-# Build your Java project and run tests with Apache Maven.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
-
-trigger:
-- master
-
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-18.04'
 
 variables:
   trivyVersion: 0.9.1
+  repository: 'hudevsecopstarks'
+  tag: 'v1.0.0'
+  userName: 'nanditahudevopscr'
+  acrlink: 'nanditahudevopscr.azurecr.io'
 
 steps:
 - task: Maven@3
@@ -19,25 +15,48 @@ steps:
     goals: ' -DskipTests package' 
     publishJUnitResults: true 
     testResultsFiles: 'target/surefire-reports/**/*.xml' # Required when publishJUnitResults == True
-    
+  displayName: 'Maven Build Operation'  
 # Copy files
 
 - task: CopyFiles@2
   inputs:
     sourceFolder: $(system.defaultworkingdirectory)
     targetFolder: $(Build.ArtifactStagingDirectory)
- 
+  displayName: 'Copying files from System to Artifactory'
  
 - task: PublishBuildArtifacts@1
   inputs:
     pathToPublish: $(Build.ArtifactStagingDirectory)
+  displayName: 'Publishing Artifactory'
     
 
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: JUnit
     testResultsFiles: '**/TEST-*.xml'
-    searchFolder: '$(System.DefaultWorkingDirectory)'
+    searchFolder: '$(system.defaultworkingdirectory)'
+  displayName: 'Publishing Test Results'
+
+- task: Docker@2
+  inputs:
+    repository: $(repository)
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+    tags: $(tag)
+  displayName: 'Building the image from dockerfile'
+
+
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      sudo docker login $(acrlink) -u $(userName) -p uVf=7HrngoLZsLbm6xgkCJL5YiNhn9jv
+      
+      sudo docker tag $(repository):$(tag) $(acrlink)/$(repository):$(tag)
+      
+      sudo docker push $(acrlink)/$(repository):$(tag)
+  displayName: 'Pushing Image to Container Registery'
+
 - task: Bash@3
   inputs:
     targetType: 'inline'
@@ -48,19 +67,12 @@ steps:
           trivy -v
   displayName: 'Download and install Trivy'
 
-- task: Docker@2
-  inputs:
-    repository: 'sharadhi'
-    command: 'build'
-    Dockerfile: '**/Dockerfile'
-    tags: tag1
-
-
 - task: Bash@3
   inputs:
     targetType: 'inline'
-    script: 'trivy image sharadhi:tag1'
-
+    script: 'trivy image $(repository):$(tag)'
+  displayName: 'Test image using trivy'
+  
 - task: Bash@3
   inputs:
     targetType: 'inline'
@@ -73,7 +85,8 @@ steps:
 - task: Bash@3
   inputs:
     targetType: 'inline'
-    script: 'terrascan scan -i k8s || echo Scanned'
-  displayName: 'Scan yaml using terrascan'
+    script: './terrascan scan -i k8s || echo successfully build'
+  displayName: 'Testing terrascan'
+
 
 
