@@ -7,6 +7,7 @@ variables:
   tag: 'v1.0.0'
   userName: 'nanditahudevopscr'
   acrlink: 'nanditahudevopscr.azurecr.io'
+  password: $(password)
 
 steps:
 - task: Maven@3
@@ -50,7 +51,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      sudo docker login $(acrlink) -u $(userName) -p uVf=7HrngoLZsLbm6xgkCJL5YiNhn9jv
+      sudo docker login $(acrlink) -u $(userName) -p $(password)
       
       sudo docker tag $(repository):$(tag) $(acrlink)/$(repository):$(tag)
       
