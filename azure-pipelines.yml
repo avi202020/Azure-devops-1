@@ -4,8 +4,6 @@ pool:
 variables:
   trivyVersion: 0.9.1
   repository: 'hudevsecopstarks'
-  tag: 'v1.0.0'
-
 
 steps:
 - task: Maven@3
@@ -41,7 +39,7 @@ steps:
     repository: $(repository)
     command: 'build'
     Dockerfile: '**/Dockerfile'
-    tags: $(tag)
+    tags: $(Build.BuildId)
   displayName: 'Building the image from dockerfile'
 
 
@@ -51,9 +49,9 @@ steps:
     script: |
       sudo docker login $(acr_link) -u $(userName) -p $(password)
       
-      sudo docker tag $(repository):$(tag) $(acr_link)/$(repository):$(tag)
+      sudo docker tag $(repository):$(Build.BuildId) $(acr_link)/$(repository):$(Build.BuildId)
       
-      sudo docker push $(acr_link)/$(repository):$(tag)
+      sudo docker push $(acr_link)/$(repository):$(Build.BuildId)
   displayName: 'Pushing Image to Container Registery'
 
 - task: Bash@3
@@ -69,7 +67,7 @@ steps:
 - task: Bash@3
   inputs:
     targetType: 'inline'
-    script: 'trivy image $(repository):$(tag)'
+    script: 'trivy image $(repository):$(Build.BuildId)'
   displayName: 'Test image using trivy'
   
 - task: Bash@3
